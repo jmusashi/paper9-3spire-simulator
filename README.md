@@ -246,6 +246,6 @@ MIT License — see [LICENSE](LICENSE) for details.
 ```
 Monasterial, J. (2026). The 3Spire Invariant: A Triadic Architecture for
 Decision Continuity. DCE Foundation Series, Paper 9, v1.2.
-DOI: PLACEHOLDER
+DOI: [10.5281/zenodo.20592885](https://doi.org/10.5281/zenodo.20592885)
 GitHub: https://github.com/jmusashi/paper9-3spire-simulator
 ```
