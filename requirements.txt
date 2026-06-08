@@ -1,0 +1,12 @@
+# DCE Foundation Series · Paper 9: The 3Spire Invariant
+# Requirements for paper9-3spire-simulator
+# Python 3.8+
+
+# No external dependencies required.
+# All simulation code uses Python standard library only.
+
+# Optional: for running tests
+pytest>=7.0.0
+
+# Optional: for generating reports
+# matplotlib>=3.5.0  # uncomment for visualization

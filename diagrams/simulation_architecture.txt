@@ -1,0 +1,155 @@
+DCE Foundation Series · Paper 9: The 3Spire Invariant
+Simulation Architecture Diagram — Text Representation
+Version: 1.2 · Joel Monasterial · June 2026
+======================================================================
+
+OVERVIEW
+--------
+The 3Spire Invariant simulation models N agents, each maintaining three
+continuity spires bound by an invariant envelope. An orchestrator monitors
+spire alignment and enforces the envelope without replacing the invariant.
+
+======================================================================
+ARCHITECTURE DIAGRAM
+======================================================================
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │                    DCE UNIVERSE CONTEXT                         │
+  │                                                                 │
+  │  ┌──────────────────────────────────────────────────────────┐  │
+  │  │                  INVARIANT ENVELOPE E(t)                  │  │
+  │  │                                                           │  │
+  │  │   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │  │
+  │  │   │   AGENT 0   │  │   AGENT 1   │  │   AGENT 2   │    │  │
+  │  │   │             │  │             │  │             │    │  │
+  │  │   │ S1 Identity │  │ S1 Identity │  │ S1 Identity │    │  │
+  │  │   │ S2 Rationale│  │ S2 Rationale│  │ S2 Rationale│    │  │
+  │  │   │ S3 Governanc│  │ S3 Governanc│  │ S3 Governanc│    │  │
+  │  │   └──────┬──────┘  └──────┬──────┘  └──────┬──────┘    │  │
+  │  │          │                │                │            │  │
+  │  │          └────────────────┼────────────────┘            │  │
+  │  │                           │                             │  │
+  │  │                    ┌──────▼──────┐                      │  │
+  │  │                    │ ORCHESTRATOR│                       │  │
+  │  │                    │             │                       │  │
+  │  │                    │ • Monitor   │                       │  │
+  │  │                    │ • Detect    │                       │  │
+  │  │                    │ • Stabilize │                       │  │
+  │  │                    │ • Enforce   │                       │  │
+  │  │                    └──────┬──────┘                       │  │
+  │  │                           │                             │  │
+  │  │              ┌────────────▼────────────┐                │  │
+  │  │              │   INVARIANT ATTRACTOR   │                │  │
+  │  │              │      (value = 50)        │                │  │
+  │  │              └─────────────────────────┘                │  │
+  │  └──────────────────────────────────────────────────────────┘  │
+  └─────────────────────────────────────────────────────────────────┘
+
+======================================================================
+COLLAPSE-PHASE FLOW
+======================================================================
+
+  NORMAL STATE:
+  ┌──────────┐    ┌──────────┐    ┌──────────┐
+  │ S1 ACTIVE│    │ S2 ACTIVE│    │ S3 ACTIVE│
+  │  value>0 │    │  value>0 │    │  value>0 │
+  └────┬─────┘    └────┬─────┘    └────┬─────┘
+       │               │               │
+       └───────────────┼───────────────┘
+                       │
+               ┌───────▼───────┐
+               │ ENVELOPE OK   │
+               │ active = 3/3  │
+               └───────────────┘
+
+  COLLAPSE EVENT (e.g., Scenario A — Identity Collapse):
+  ┌──────────┐    ┌──────────┐    ┌──────────┐
+  │S1 COLLAPSE    │ S2 ACTIVE│    │ S3 ACTIVE│
+  │  value=0 │    │  value>0 │    │  value>0 │
+  └────┬─────┘    └────┬─────┘    └────┬─────┘
+       │               │               │
+       │    ┌──────────▼───────────┐   │
+       │    │   ORCHESTRATOR       │   │
+       │    │   detects collapse   │   │
+       │    │   active = 2/3       │   │
+       │    └──────────┬───────────┘   │
+       │               │               │
+       │    ┌──────────▼───────────┐   │
+       │    │   STABILIZATION      │   │
+       │    │   S1 = (S2 + S3) / 2 │   │
+       │    └──────────┬───────────┘   │
+       │               │               │
+  ┌────▼─────┐         │               │
+  │S1 RECOVER│         │               │
+  │  value>0 │         │               │
+  └────┬─────┘         │               │
+       └───────────────┼───────────────┘
+                       │
+               ┌───────▼───────┐
+               │ ENVELOPE OK   │
+               │ active = 3/3  │
+               └───────────────┘
+
+  TOTAL COLLAPSE (invariant fails):
+  ┌──────────┐    ┌──────────┐    ┌──────────┐
+  │S1 COLLAPSE    │S2 COLLAPSE    │S3 COLLAPSE│
+  │  value=0 │    │  value=0 │    │  value=0 │
+  └────┬─────┘    └────┬─────┘    └────┬─────┘
+       └───────────────┼───────────────┘
+                       │
+               ┌───────▼───────┐
+               │ ENVELOPE FAIL │
+               │ active = 0/3  │
+               │ INVARIANT     │
+               │ COLLAPSED     │
+               └───────────────┘
+
+  NOTE: Total collapse requires ALL THREE spires to fail simultaneously.
+        This is the only condition under which the invariant collapses.
+
+======================================================================
+SPIRE INTERACTION MODEL
+======================================================================
+
+  Each agent maintains three spires that interact through the envelope:
+
+  S1(t+1) = (S1(t) + invariant) / 2          [HiveSync pull]
+  S2(t+1) = (S2(t) + invariant) / 2          [HiveSync pull]
+  S3(t+1) = (S3(t) + invariant) / 2          [HiveSync pull]
+
+  If S1(t) = 0 and S2(t) > 0 and S3(t) > 0:
+    S1(t) = (S2(t) + S3(t)) / 2              [Stabilization]
+
+  E(t) = 1 if any Si(t) > 0, else 0          [Envelope status]
+
+======================================================================
+MODULE ARCHITECTURE
+======================================================================
+
+  paper9_invariant/
+  ├── spires.py       → Spire, SpireTriad
+  │                     S1 (Identity), S2 (Rationale), S3 (Governance)
+  │                     collapse injection, stabilization, pull
+  │
+  ├── invariant.py    → InvariantEnvelope, Orchestrator, CollapseEvent
+  │                     envelope enforcement, collapse detection
+  │
+  ├── agent.py        → SpireAgent
+  │                     identity-anchored, collapse-phase stable
+  │                     DCE memory, status reporting
+  │
+  └── simulation.py   → run_paper9_simulation, EpistemicValidator
+                        multi-agent loop, EV-1/EV-2/EV-3 validation
+
+  paper8_baseline/
+  └── paper8_sim.py   → run_paper8_simulation (Paper 8 §4 Listing 1)
+                        baseline for comparison
+
+  comparison/
+  └── compare_p8_p9.py → run_comparison
+                         structured Paper 8 vs Paper 9 report
+
+======================================================================
+Source: DCE Foundation Series · Paper 9 §15.5
+DOI: PLACEHOLDER · Author: Joel Monasterial · June 2026
+======================================================================
