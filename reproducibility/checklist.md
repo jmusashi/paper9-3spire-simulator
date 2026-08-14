@@ -146,7 +146,7 @@ If you use this simulation suite, please cite:
 ```
 Monasterial, J. (2026). Paper 9: The 3Spire Invariant — A Triadic Architecture
 for Decision Continuity. DCE Foundation Series, v1.2 (Regenerated Edition).
-DOI: PLACEHOLDER
+DOI: https://doi.org/10.5281/zenodo.20592885
 GitHub: https://github.com/jmusashi/paper9-3spire-simulator
 ```
 
